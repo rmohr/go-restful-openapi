@@ -89,9 +89,15 @@ func buildParameter(r *restful.Parameter) spec.Parameter {
 	p.Description = param.Description
 	p.Name = param.Name
 	p.Required = param.Required
-	p.Default = param.DefaultValue
-	p.Format = param.DataFormat
-	p.Type = param.DataType
+
+	if param.Kind == restful.BodyParameterKind {
+		p.Schema = new(spec.Schema)
+		p.Schema.Ref = spec.MustCreateRef("#/definitions/" + param.DataType)
+	} else {
+		p.Type = param.DataType
+		p.Default = param.DefaultValue
+		p.Format = param.DataFormat
+	}
 	return p
 }
 
