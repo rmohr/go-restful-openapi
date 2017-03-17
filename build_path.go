@@ -14,13 +14,28 @@ const KeyOpenAPITags = "openapi.tags"
 func BuildPaths(ws *restful.WebService) spec.Paths {
 	p := spec.Paths{Paths: map[string]spec.PathItem{}}
 	for _, each := range ws.Routes() {
-		existingPathItem, ok := p.Paths[each.Path]
+		path := sanitizePath(each.Path)
+		existingPathItem, ok := p.Paths[path]
 		if !ok {
 			existingPathItem = spec.PathItem{}
 		}
-		p.Paths[each.Path] = buildPathItem(ws, each, existingPathItem)
+		p.Paths[path] = buildPathItem(ws, each, existingPathItem)
 	}
 	return p
+}
+
+func sanitizePath(restfulPath string) string {
+	openapiPath := ""
+	for _, fragment := range strings.Split(restfulPath, "/") {
+		if fragment == "" {
+			continue
+		}
+		if strings.HasPrefix(fragment, "{") && strings.Contains(fragment, ":") {
+			fragment = strings.Split(fragment, ":")[0] + "}"
+		}
+		openapiPath += "/" + fragment
+	}
+	return openapiPath
 }
 
 func buildPathItem(ws *restful.WebService, r restful.Route, existingPathItem spec.PathItem) spec.PathItem {
@@ -89,6 +104,8 @@ func buildParameter(r *restful.Parameter) spec.Parameter {
 	p.Description = param.Description
 	p.Name = param.Name
 	p.Required = param.Required
+
+	// TODO add regex pattern to p.Pattern
 
 	if param.Kind == restful.BodyParameterKind {
 		p.Schema = new(spec.Schema)
