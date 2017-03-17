@@ -91,6 +91,7 @@ func buildParameter(r *restful.Parameter) spec.Parameter {
 	p.Required = param.Required
 	p.Default = param.DefaultValue
 	p.Format = param.DataFormat
+	p.Type = param.DataType
 	return p
 }
 

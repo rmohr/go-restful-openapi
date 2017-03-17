@@ -21,6 +21,11 @@ func TestRouteToPath(t *testing.T) {
 
 	p := BuildPaths(ws)
 	t.Log(asJSON(p))
+
+	if p.Paths["/tests/{v}/a/{b}"].Get.Parameters[0].Type != "string" {
+		t.Error("Parameter type is not set.")
+
+	}
 }
 
 func TestMultipleMethodsRouteToPath(t *testing.T) {
